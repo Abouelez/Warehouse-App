@@ -3,4 +3,4 @@
 use App\Controllers\Controller;
 use Core\Router;
 
-Router::get('/test', [Controller::class, 'test']);
+Router::post('/test', [Controller::class, 'test']);
