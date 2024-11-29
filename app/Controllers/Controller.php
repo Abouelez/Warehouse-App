@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\Uom;
+
 class Controller
 {
     public function response($data, $status_code = 200, $headers = [])
@@ -43,9 +45,10 @@ class Controller
             exit;
         }
     }
-    function test($data)
+    function test($id, $data)
     {
-        $this->validate($data, ['name' => "required"]);
-        echo $this->response(['data' => $data, 'message' => 'Work Successfully']);
+        $s = new Uom();
+
+        print_r($s->update($id, $data));
     }
 }

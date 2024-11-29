@@ -58,12 +58,9 @@ class Model
         $stmt->execute([$id]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($record) {
-            $instance->id = $id;
-            foreach ($record as $key => $value) {
-                $instance->data[$key] = $value;
-            }
-            return $instance;
+            return $record;
         }
+
         return false;
     }
 
@@ -86,18 +83,15 @@ class Model
         $values = array_values($data);
 
         if ($stmt->execute($values)) {
-            $instance->id = $instance->connection->lastInsertId();
 
-            foreach ($data as $key => $value) {
-                $instance->$key = $value;
-            }
-            return $instance;
+            return self::find($instance->connection->lastInsertId());
         }
         return false;
     }
 
     public function update($id, $data)
     {
+
         // Validate that all keys exist in attributes
         foreach ($data as $key => $value) {
             if (!in_array($key, $this->attributes)) {
@@ -114,11 +108,8 @@ class Model
         $values = array_values($data);
         $values[] = $id;
         if ($stmt->execute($values)) {
-            $this->id = $id;
-            foreach ($data as $key => $value) {
-                $this->$key = $value;
-            }
-            return $this;
+
+            return self::find($id);
         }
         return false;
     }
