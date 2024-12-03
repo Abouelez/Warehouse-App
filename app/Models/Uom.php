@@ -11,7 +11,7 @@ namespace App\Models;
 class Uom extends Model
 {
 
-    public $table = "UOM";
+    public  $table = "UOM";
     public $attributes = ['name', 'description'];
     public function __construct()
     {

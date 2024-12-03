@@ -8,55 +8,61 @@ use PDO;
 
 class Model
 {
-    protected $connection;
-    protected $table = null;
+    protected static $connection;
+    protected  $table = null;
     protected $id;
     protected $attributes = [];
     protected $data = [];
 
     public function __construct()
     {
-        $this->connection = Database::get_instance()->get_connection();
-        if (!$this->table)
-            $this->table = strtolower(get_called_class() . 's');  //User class will be users ;)
+        self::$connection = Database::get_instance()->get_connection();
+        if (!$this->table) {
+            $class = explode('\\', get_called_class()); //it will return => App\Models\items, we need also 'items'
+            $this->table = strtolower($class[array_key_last($class)]) . "s";     //User class will be users ;)
+        }
     }
 
     //Get value of specific attribute(Magic method)
-    public function __get($name)
-    {
-        if (in_array($name, $this->attributes)) {
-            return $this->data[$name] ?? null;
-        }
-        throw new Exception("Attribute $name does not exist in " . get_called_class());
-    }
+    // public function __get($name)
+    // {
+    //     if (in_array($name, $this->attributes)) {
+    //         return $this->data[$name] ?? null;
+    //     }
+    //     throw new Exception("Attribute $name does not exist in " . get_called_class());
+    // }
 
-    //Set value of specific attribute(Magic method)
-    public function __set($name, $value)
-    {
-        if (in_array($name, $this->attributes)) {
-            $this->data[$name] = $value;
-        } else {
-            throw new Exception("Attribute $name does not exist in " . get_called_class());
-        }
-    }
+    // //Set value of specific attribute(Magic method)
+    // public function __set($name, $value)
+    // {
+    //     if (in_array($name, $this->attributes)) {
+    //         $this->data[$name] = $value;
+    //     } else {
+    //         throw new Exception("Attribute $name does not exist in " . get_called_class());
+    //     }
+    // }
 
     // Static method to get all records
     public static function all()
     {
-        $instance = new static(); // Create an instance of the class
+        $instance = new static();
+
         $query = "SELECT * FROM " . $instance->table;
-        $stmt = $instance->connection->query($query);
+        $stmt = self::$connection->query($query);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function find($id)
+    public static function find($search_key, $search_column = 'id')
     {
+
         $instance = new static();
-        $query = "SELECT * FROM {$instance->table} WHERE id = ?";
-        $stmt = $instance->connection->prepare($query);
-        $stmt->execute([$id]);
-        $record = $stmt->fetch(PDO::FETCH_ASSOC);
+        $query = "SELECT * FROM {$instance->table} WHERE $search_column = :$search_column";
+
+        $stmt = self::$connection->prepare($query);
+
+        $stmt->execute([$search_column => $search_key]);
+        $record = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if ($record) {
             return $record;
         }
@@ -73,18 +79,18 @@ class Model
                 throw new Exception("Attribute $key does not exist in " . get_called_class());
         }
 
-        $cols = implode(',', array_values($instance->attributes)); //Get columns names
+        $cols = implode(',', array_keys($data)); //Get columns names
         $placeholders = implode(',', array_fill(0, count($data), '?')); // Generate placeholders
 
         //Prepare SQL statement
         $query = "INSERT INTO {$instance->table} ($cols) VAlUES ($placeholders)";
-        $stmt = $instance->connection->prepare($query);
+        $stmt = self::$connection->prepare($query);
 
         $values = array_values($data);
 
         if ($stmt->execute($values)) {
 
-            return self::find($instance->connection->lastInsertId());
+            return self::find(self::$connection->lastInsertId());
         }
         return false;
     }
@@ -100,10 +106,10 @@ class Model
         }
 
         //Generate the SET part of query
-        $set_clause = implode(',', array_map(fn($key) => "$key = ?", $this->attributes));
+        $set_clause = implode(',', array_map(fn($key) => "$key = ?", array_keys($data)));
 
         $query = "UPDATE {$this->table} SET {$set_clause} WHERE id = ?";
-        $stmt = $this->connection->prepare($query);
+        $stmt = self::$connection->prepare($query);
 
         $values = array_values($data);
         $values[] = $id;
@@ -117,7 +123,7 @@ class Model
     public function delete($id)
     {
         $query = "DELETE FROM {$this->table} WHERE id = ?";
-        $stmt = $this->connection->prepare($query);
+        $stmt = self::$connection->prepare($query);
 
         return $stmt->execute([$id]);
     }

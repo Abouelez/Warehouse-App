@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Uom;
+use Config\Database;
 
 class Controller
 {
@@ -17,7 +18,20 @@ class Controller
         echo json_encode($data);
         exit;
     }
+    public function is_unique($table_with_field, $value)
+    {
 
+        $data = explode(',', $table_with_field); // form users,email to ['users', 'email']
+        $table = $data[0];
+        $field = $data[1];
+
+        $connection = Database::get_instance()->get_connection();
+        $query = "SELECT COUNT(*) FROM $table WHERE $field = :value";
+        $stmt = $connection->prepare($query);
+        $stmt->execute(['value' => $value]);
+
+        return $stmt->fetchColumn() == 0;
+    }
     public function validate($data, $rules)
     {
         $errors = [];
@@ -34,10 +48,12 @@ class Controller
                     $errors[$field][] = "$field must be an integer";
                 elseif ($rule == "string" && !is_string($value))
                     $errors[$field][] = "$field must be a string";
-                elseif (str_starts_with($rule, "min:") && strlen($field) < explode(":", $rule)[1])
+                elseif (str_starts_with($rule, "min:") && strlen($value) < explode(":", $rule)[1])
                     $errors[$field][] = "$field must be at least " . explode(":", $rule)[1] . " characters.";
-                elseif (str_starts_with($rule, "max:") && strlen($field) > explode(":", $rule)[1])
+                elseif (str_starts_with($rule, "max:") && strlen($value) > explode(":", $rule)[1])
                     $errors[$field][] = "$field must be less than " . explode(":", $rule)[1] + 1 . " characters.";
+                elseif (str_starts_with($rule, 'unique:') && !$this->is_unique(explode(':', $rule)[1], $value))
+                    $errors[$field][] = "$field must be unique";
             }
         }
         if (!empty($errors)) {
@@ -45,10 +61,19 @@ class Controller
             exit;
         }
     }
-    function test($id, $data)
+    function test()
     {
-        $s = new Uom();
+        $var1 = 'key';
+        $var2 = 'value';
 
-        print_r($s->update($id, $data));
+        $arr = [$var1 => $var2];
+        print_r($arr);
+        // var_dump($this->is_unique('UOM,name', 'new test'));
+        // die();
+
+        // $this->validate($data, ['name' => 'unique:UOM,name']);
+        // $s = Uom::insert($data);
+
+        // return $this->response(['message' => 'inserted successfully', 'data' => $s]);
     }
 }

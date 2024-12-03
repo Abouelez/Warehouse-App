@@ -9,6 +9,10 @@ class Router
     private static $routes = [];
     private static $request_method;
 
+    // public function __call($name, $arguments)
+    // {
+    //     echo "Method $name doesn't exist";
+    // }
     public function routes(): array
     {
         return self::$routes;
@@ -22,12 +26,14 @@ class Router
 
     public static function post($uri, $callback)
     {
+
         $uri = self::check_if_url_has_params($uri);
         self::$routes['POST'][$uri] = $callback;
     }
 
     public static function put($uri, $callback)
     {
+
         $uri = self::check_if_url_has_params($uri);
         self::$routes['PUT'][$uri] = $callback;
     }
@@ -43,6 +49,11 @@ class Router
     {
 
         self::$request_method = $_SERVER['REQUEST_METHOD'];
+        if (isset($_POST['__method'])) {
+            // var_dump($_POST['__method']);
+            self::$request_method = strtoupper($_POST['__method']);
+            unset($_POST['__method']);
+        }
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $uri_parameter = null;
 
