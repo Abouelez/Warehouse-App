@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\AuthController;
 use App\Controllers\Controller;
 use App\Controllers\ItemController;
 use App\Controllers\UomController;
@@ -17,3 +18,6 @@ Router::get('find_item/{id}', [ItemController::class, 'find']);
 Router::post('/items', [ItemController::class, 'store']);
 Router::put('items/{id}', [ItemController::class, 'update']);
 Router::delete('items/{id}', [ItemController::class, 'delete']);
+//Authentication routes
+Router::post('/login', [AuthController::class, 'login']);
+Router::post('/register', [AuthController::class, 'register']);

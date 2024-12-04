@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Models\Uom;
 use Config\Database;
 
 class Controller
@@ -54,6 +53,8 @@ class Controller
                     $errors[$field][] = "$field must be less than " . explode(":", $rule)[1] + 1 . " characters.";
                 elseif (str_starts_with($rule, 'unique:') && !$this->is_unique(explode(':', $rule)[1], $value))
                     $errors[$field][] = "$field must be unique";
+                elseif ($rule == "confirmed" && $value != $data['password_confirmation'])
+                    $errors[$field][] = "Password confirmation does not match. Please ensure both passwords are identical.";
             }
         }
         if (!empty($errors)) {
