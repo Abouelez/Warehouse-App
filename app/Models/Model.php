@@ -53,9 +53,8 @@ class Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function find($search_key, $search_column = 'id')
+    public static function findAll($search_key, $search_column = 'id')
     {
-
         $instance = new static();
         $query = "SELECT * FROM {$instance->table} WHERE $search_column = :$search_column";
 
@@ -67,6 +66,13 @@ class Model
             return $record;
         }
 
+        return false;
+    }
+    public static function find($search_key, $search_column = 'id')
+    {
+        $records = self::findAll($search_key, $search_column);
+        if ($records)
+            return $records[0];
         return false;
     }
 

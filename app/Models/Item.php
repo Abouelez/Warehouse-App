@@ -11,4 +11,11 @@ class Item extends Model
     {
         parent::__construct();
     }
+
+    public static function get_available_stock($id)
+    {
+        return Inventory::find($id, 'item_id')['available_stock'];
+    }
+
+    
 }

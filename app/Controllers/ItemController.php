@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\Inventory;
 use App\Models\Item;
 use App\Models\Uom;
 
@@ -13,9 +14,10 @@ class ItemController extends Controller
         $items = Item::all();
 
         foreach ($items as &$item) {
-            $uom = Uom::find($item['uom_id']);
-            $item['uom'] = $uom;
+            $item['uom'] = Uom::find($item['uom_id']); //get uom details
             unset($item['uom_id']);
+
+            $item['available_stock'] = Item::get_available_stock($item['id']); //get available stock
         }
 
         $this->response(['data' => $items], 200);
@@ -24,6 +26,13 @@ class ItemController extends Controller
     function find($key)
     {
         $data = Item::find($key);
+
+        $available_stock = Item::get_available_stock($data['id']);
+        $data['available_stock'] = $available_stock;
+
+        $data['uom'] = Uom::find($data['uom_id']); //get uom details
+        unset($data['uom_id']);
+
         $this->response(['data' => $data], 200);
     }
 
@@ -35,10 +44,15 @@ class ItemController extends Controller
             'uom_id' => 'required|number'
         ]);
         $item = Item::insert($data);
+        //Add record to inventory (Once item added all it's stock is available).
+        Inventory::insert([
+            'item_id' => $item['id'],
+            'available_stock' => $item['stock']
+        ]);
         $this->response([
             'Message' => 'Item Created Successfully',
             'data' => $item
-        ], 200);
+        ], 201);
     }
 
     function update($id, $data)

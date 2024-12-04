@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Uom;
 
@@ -29,7 +28,7 @@ class UomController extends Controller
         $this->response([
             'Messages' => 'Inserted Successfully',
             'data' => $uom
-        ], 200);
+        ], 201);
     }
 
     function update($id, $data)
