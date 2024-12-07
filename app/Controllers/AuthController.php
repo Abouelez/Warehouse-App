@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Helpers\TokenHelper;
 use App\Models\User;
 use App\Models\AccessToken;
-
+use App\Helpers\RequestHelper;
 
 class AuthController extends Controller
 {
@@ -51,5 +51,15 @@ class AuthController extends Controller
             ], 200);
         }
         $this->response(['Message' => 'Invalid credentials.'], 401);
+    }
+
+    function logout()
+    {
+        $token = AccessToken::find(RequestHelper::get_bearer_token(), 'token');
+        $access_token = new AccessToken();
+        $access_token->delete($token['id']);
+        unset($_SESSION['user']);
+
+        $this->response([], 204);
     }
 }

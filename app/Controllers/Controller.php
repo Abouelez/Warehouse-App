@@ -10,7 +10,8 @@ class Controller
     {
         http_response_code($status_code);
 
-        header('Content-Type: Application/json');
+        header('Content-Type: application/json');
+
         foreach ($headers as $header) {
             header($header);
         }
@@ -64,6 +65,7 @@ class Controller
     }
     function test()
     {
+
         $var1 = 'key';
         $var2 = 'value';
 

@@ -6,6 +6,9 @@ use App\Controllers\ItemController;
 use App\Controllers\UomController;
 use Core\Router;
 
+
+// Router::get('test', [Controller::class, 'test'], 'auth');
+
 //Api routes for UOM "Unit Of Measurement".
 Router::get('/all_uom', [UomController::class, 'all']);
 Router::post('/uom', [UomController::class, 'store']);
@@ -21,3 +24,4 @@ Router::delete('items/{id}', [ItemController::class, 'delete']);
 //Authentication routes
 Router::post('/login', [AuthController::class, 'login']);
 Router::post('/register', [AuthController::class, 'register']);
+Router::post('logout', [AuthController::class, 'logout'], 'auth');

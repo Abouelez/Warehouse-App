@@ -2,8 +2,10 @@
 
 namespace App\Helpers;
 
+use App\Models\AccessToken;
 use Config\Database;
 use Firebase\JWT\JWT;
+use PDO;
 
 trait TokenHelper
 {
@@ -29,5 +31,11 @@ trait TokenHelper
             'token' => $refresh_token,
             'expires_at' => date('Y-m-d H:i:s', time() + (30 * 24 * 60 * 60))
         ]);
+    }
+
+    static function is_valid_token($token)
+    {
+        $result = AccessToken::find($token, 'token');
+        return $result;
     }
 }

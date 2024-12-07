@@ -2,13 +2,16 @@
 
 namespace Core;
 
+use App\Helpers\RequestHelper;
+use App\Middlewares\Middleware;
 use ReflectionMethod;
 
 class Router
 {
+    use RequestHelper;
     private static $routes = [];
     private static $request_method;
-
+    private static $uri_parameter = null;
     // public function __call($name, $arguments)
     // {
     //     echo "Method $name doesn't exist";
@@ -17,29 +20,42 @@ class Router
     {
         return self::$routes;
     }
-
-    public static function get($uri, $callback)
+    static function middleware($middleware, $method, $uri)
     {
+        if (
+            $_SERVER['REQUEST_METHOD'] == $method &&
+            trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') == trim($uri, '/')
+        )
+            Middleware::apply_middleware($middleware);
+    }
+    public static function get($uri, $callback, $middleware = null)
+    {
+        if ($middleware) self::middleware($middleware, 'GET', $uri);
+
         $uri = self::check_if_url_has_params($uri);
         self::$routes['GET'][$uri] = $callback;
     }
 
-    public static function post($uri, $callback)
+    public static function post($uri, $callback, $middleware = null)
     {
+        if ($middleware) self::middleware($middleware, 'POST', $uri);
 
         $uri = self::check_if_url_has_params($uri);
         self::$routes['POST'][$uri] = $callback;
     }
 
-    public static function put($uri, $callback)
+    public static function put($uri, $callback, $middleware = null)
     {
+        if ($middleware) self::middleware($middleware, 'POST', $uri);
 
         $uri = self::check_if_url_has_params($uri);
         self::$routes['PUT'][$uri] = $callback;
     }
 
-    public static function delete($uri, $callback)
+    public static function delete($uri, $callback, $middleware = null)
     {
+        if ($middleware) self::middleware($middleware, 'POST', $uri);
+
         $uri = self::check_if_url_has_params($uri);
         self::$routes['DELETE'][$uri] = $callback;
     }
@@ -47,52 +63,62 @@ class Router
 
     public static function resolve()
     {
+        self::get_method();   //get request method
 
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri_data = self::check_uri($uri); //get uri data 
+        if ($uri_data) {
+
+            $uri = $uri_data['uri'];
+            self::$uri_parameter = $uri_data['uri_param']; //if uri has a parameter => test/{id}
+
+            $callback = self::$routes[self::$request_method][$uri];
+            self::handle_callback_func($callback);
+        } else {
+            http_response_code(404);
+            echo '404 Not Found';
+        }
+    }
+
+    private static function handle_callback_func($callback)
+    {
+        if (is_array($callback)) {
+            $controller = $callback[0];
+            $method = $callback[1];
+
+            $controller = new $controller();
+            //get request data
+            $data = self::get_requested_data(self::$request_method);
+
+            //check if method has parameters
+            $reflection = new ReflectionMethod($controller, $method);
+
+            if ($reflection->getNumberOfParameters() > 0) {
+                if (self::$uri_parameter)
+                    $controller->$method(self::$uri_parameter, $data);
+                else
+                    $controller->$method($data);
+            } else {
+                if (self::$uri_parameter)
+                    $controller->$method(self::$uri_parameter);
+                else
+                    $controller->$method();
+            }
+        } else {
+            call_user_func($callback);
+        }
+    }
+
+    private static function get_method()
+    {
         self::$request_method = $_SERVER['REQUEST_METHOD'];
         if (isset($_POST['__method'])) {
             // var_dump($_POST['__method']);
             self::$request_method = strtoupper($_POST['__method']);
             unset($_POST['__method']);
         }
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $uri_parameter = null;
-
-        $uri_data = self::check_uri($uri);
-        if ($uri_data) {
-            $uri = $uri_data['uri'];
-            $uri_parameter = $uri_data['uri_param'];
-
-            $callback = self::$routes[self::$request_method][$uri];
-            if (is_array($callback)) {
-                $controller = $callback[0];
-                $method = $callback[1];
-
-                $controller = new $controller();
-                //get request data
-                $data = self::get_requested_data(self::$request_method);
-
-                //check if method has parameters
-                $reflection = new ReflectionMethod($controller, $method);
-
-                if ($reflection->getNumberOfParameters() > 0) {
-                    if ($uri_parameter)
-                        $controller->$method($uri_parameter, $data);
-                    else
-                        $controller->$method($data);
-                } else {
-                    if ($uri_parameter)
-                        $controller->$method($uri_parameter);
-                    else
-                        $controller->$method();
-                }
-            } else {
-                call_user_func($callback);
-            }
-        } else {
-            http_response_code(404);
-            echo '404 Not Found';
-        }
     }
+
     private static function get_requested_data($request_method)
     {
 
@@ -146,5 +172,10 @@ class Router
             ];
         }
         return false;
+    }
+
+    function __destruct()
+    {
+        self::$uri_parameter = null;
     }
 }

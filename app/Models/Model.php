@@ -101,7 +101,7 @@ class Model
         return false;
     }
 
-    public function update($id, $data)
+    public function update(int $id, $data)
     {
 
         // Validate that all keys exist in attributes
