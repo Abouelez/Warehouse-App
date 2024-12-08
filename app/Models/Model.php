@@ -101,12 +101,12 @@ class Model
         return false;
     }
 
-    public function update(int $id, $data)
+    public static function update(int $id, $data)
     {
-
+        $instance = new static();
         // Validate that all keys exist in attributes
         foreach ($data as $key => $value) {
-            if (!in_array($key, $this->attributes)) {
+            if (!in_array($key, $instance->attributes)) {
                 throw new Exception("Attribute $key does not exist in " . get_called_class());
             }
         }
@@ -114,7 +114,7 @@ class Model
         //Generate the SET part of query
         $set_clause = implode(',', array_map(fn($key) => "$key = ?", array_keys($data)));
 
-        $query = "UPDATE {$this->table} SET {$set_clause} WHERE id = ?";
+        $query = "UPDATE {$instance->table} SET {$set_clause} WHERE id = ?";
         $stmt = self::$connection->prepare($query);
 
         $values = array_values($data);
@@ -126,9 +126,10 @@ class Model
         return false;
     }
 
-    public function delete($id)
+    public static function delete($id)
     {
-        $query = "DELETE FROM {$this->table} WHERE id = ?";
+        $instance = new static();
+        $query = "DELETE FROM {$instance->table} WHERE id = ?";
         $stmt = self::$connection->prepare($query);
 
         return $stmt->execute([$id]);

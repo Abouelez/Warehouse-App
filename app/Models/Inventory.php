@@ -12,4 +12,9 @@ class Inventory extends Model
     {
         parent::__construct();
     }
+
+    static function check_if_stock_available($inventory_record, $stock)
+    {
+        return $inventory_record['available_stock'] > $stock;
+    }
 }

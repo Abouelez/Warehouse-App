@@ -35,8 +35,7 @@ class UomController extends Controller
     {
         $this->validate($data, ['name' => 'unique:UOM,name']);
 
-        $uom = new Uom();
-        $uom = $uom->update($id, $data);
+        $uom = Uom::update($id, $data);
 
         $this->response([
             'Message' => 'Updated Successfully.',
@@ -46,8 +45,7 @@ class UomController extends Controller
 
     function delete($id)
     {
-        $uom = new Uom();
-        $uom->delete($id);
+        Uom::delete($id);
 
         $this->response([], 204);
     }

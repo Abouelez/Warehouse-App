@@ -3,7 +3,9 @@
 use App\Controllers\AuthController;
 use App\Controllers\Controller;
 use App\Controllers\ItemController;
+use App\Controllers\TransactionController;
 use App\Controllers\UomController;
+use App\Models\Transaction;
 use Core\Router;
 
 
@@ -25,3 +27,7 @@ Router::delete('items/{id}', [ItemController::class, 'delete']);
 Router::post('/login', [AuthController::class, 'login']);
 Router::post('/register', [AuthController::class, 'register']);
 Router::post('logout', [AuthController::class, 'logout'], 'auth');
+//Transaction routes
+Router::post('transactions', [TransactionController::class, 'store']);
+Router::post('return_item/{id}', [TransactionController::class, 'return_item']);
+Router::post('add_to_item/{id}', [TransactionController::class, 'add_to_current_item']);

@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Inventory;
 use App\Models\Item;
+use App\Models\Transaction;
 use App\Models\Uom;
 
 class ItemController extends Controller
@@ -49,6 +50,15 @@ class ItemController extends Controller
             'item_id' => $item['id'],
             'available_stock' => $item['stock']
         ]);
+        //Also add record to transaction table.
+        Transaction::insert([
+            'item_id' => $item['id'],
+            'quantity' => $item['stock'],
+            'user_id' => '4',
+            'date' => date('Y-m-d H:i:s'),
+            'description' => 'New Item',
+            'type' => 'new'
+        ]);
         $this->response([
             'Message' => 'Item Created Successfully',
             'data' => $item
@@ -58,8 +68,7 @@ class ItemController extends Controller
     function update($id, $data)
     {
         $this->validate($data, ['name' => 'unique:items,name']);
-        $item_instance = new Item();
-        $item = $item_instance->update($id, $data);
+        $item = Item::update($id, $data);
         $this->response([
             "Message" => "Item Updated Successfully",
             'data' => $item
@@ -68,8 +77,7 @@ class ItemController extends Controller
 
     function delete($id)
     {
-        $item_instance = new Item();
-        $item_instance->delete($id);
+        Item::delete($id);
 
         $this->response([], 204);
     }
