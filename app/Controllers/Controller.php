@@ -32,6 +32,7 @@ class Controller
 
         return $stmt->fetchColumn() == 0;
     }
+    
     public function validate($data, $rules)
     {
         $errors = [];

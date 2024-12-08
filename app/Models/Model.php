@@ -71,6 +71,7 @@ class Model
     public static function find($search_key, $search_column = 'id')
     {
         $records = self::findAll($search_key, $search_column);
+
         if ($records)
             return $records[0];
         return false;
@@ -101,7 +102,7 @@ class Model
         return false;
     }
 
-    public static function update(int $id, $data)
+    public static function update($id, $data)
     {
         $instance = new static();
         // Validate that all keys exist in attributes
@@ -119,6 +120,7 @@ class Model
 
         $values = array_values($data);
         $values[] = $id;
+
         if ($stmt->execute($values)) {
 
             return self::find($id);

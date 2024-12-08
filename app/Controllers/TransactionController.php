@@ -8,6 +8,24 @@ use App\Models\Transaction;
 
 class TransactionController extends Controller
 {
+    function all_transactions()
+    {
+        $data = Transaction::all();
+        $this->response([
+            'data' => $data
+        ], 200);
+    }
+
+    function get_transactions_by_type($type)
+    {
+        if (!in_array($type, ['new', 'return', 'out_for_work', 'add']))
+            $this->response(['message' => '404 Not Found.'], 404);
+
+        $data = Transaction::findAll($type, 'type');
+        $this->response([
+            'data' => $data
+        ], 200);
+    }
 
     function store($data)
     {
@@ -22,13 +40,13 @@ class TransactionController extends Controller
             $data['type'] == 'out_for_work' &&
             !Inventory::check_if_stock_available(Inventory::find($data['item_id'], 'item_id'), $data['quantity'])
         )
-            echo $this->response(['message' => 'Required quantity is not available now.'], 422);
+            $this->response(['message' => 'Required quantity is not available now.'], 422);
 
         $transaction = Transaction::insert($data);
 
         $this->update_stock($transaction['item_id'], $transaction['quantity'], $transaction['type']);
 
-        echo $this->response([
+        $this->response([
             'message' => 'Transaction done successfully.',
             'data' => $transaction
         ], 201);
@@ -58,7 +76,10 @@ class TransactionController extends Controller
             'transaction_id' => 'required',
         ]);
 
-        $transaction = Transaction::update($transaction_id, ['returned_at' => date('Y-m-d H:i:s')]);
+        $transaction = Transaction::update($transaction_id, [
+            'returned_at' => date('Y-m-d H:i:s'),
+            'type' => 'return'
+        ]);
         $this->update_stock(Item::find($transaction['item_id'])['id'], $transaction['quantity'], 'return');
 
         echo $this->response(['message' => 'Stock updated successfully.'], 200);

@@ -27,7 +27,8 @@ class ItemController extends Controller
     function find($key)
     {
         $data = Item::find($key);
-
+        if (!$data)
+            echo $this->response(['message' => '404 Not Found.'], 404);
         $available_stock = Item::get_available_stock($data['id']);
         $data['available_stock'] = $available_stock;
 
@@ -67,8 +68,13 @@ class ItemController extends Controller
 
     function update($id, $data)
     {
+        if (!Item::find($id)) {
+            $this->response(['message' => '404 Not Found.'], 404);
+        }
+
         $this->validate($data, ['name' => 'unique:items,name']);
         $item = Item::update($id, $data);
+
         $this->response([
             "Message" => "Item Updated Successfully",
             'data' => $item
@@ -77,6 +83,9 @@ class ItemController extends Controller
 
     function delete($id)
     {
+        if (!Item::find($id)) {
+            $this->response(['message' => '404 Not Found.'], 404);
+        }
         Item::delete($id);
 
         $this->response([], 204);

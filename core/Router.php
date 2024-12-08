@@ -12,6 +12,7 @@ class Router
     private static $routes = [];
     private static $request_method;
     private static $uri_parameter = null;
+    private static $has_param = false;
     // public function __call($name, $arguments)
     // {
     //     echo "Method $name doesn't exist";
@@ -32,7 +33,7 @@ class Router
     {
         if ($middleware) self::middleware($middleware, 'GET', $uri);
 
-        $uri = self::check_if_url_has_params($uri);
+        $uri = self::check_if_url_take_params($uri);
         self::$routes['GET'][$uri] = $callback;
     }
 
@@ -40,7 +41,7 @@ class Router
     {
         if ($middleware) self::middleware($middleware, 'POST', $uri);
 
-        $uri = self::check_if_url_has_params($uri);
+        $uri = self::check_if_url_take_params($uri);
         self::$routes['POST'][$uri] = $callback;
     }
 
@@ -48,7 +49,7 @@ class Router
     {
         if ($middleware) self::middleware($middleware, 'POST', $uri);
 
-        $uri = self::check_if_url_has_params($uri);
+        $uri = self::check_if_url_take_params($uri);
         self::$routes['PUT'][$uri] = $callback;
     }
 
@@ -56,7 +57,7 @@ class Router
     {
         if ($middleware) self::middleware($middleware, 'POST', $uri);
 
-        $uri = self::check_if_url_has_params($uri);
+        $uri = self::check_if_url_take_params($uri);
         self::$routes['DELETE'][$uri] = $callback;
     }
 
@@ -67,17 +68,17 @@ class Router
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $uri_data = self::check_uri($uri); //get uri data 
-        if ($uri_data) {
 
-            $uri = $uri_data['uri'];
-            self::$uri_parameter = $uri_data['uri_param']; //if uri has a parameter => test/{id}
-
-            $callback = self::$routes[self::$request_method][$uri];
-            self::handle_callback_func($callback);
-        } else {
+        if (!$uri_data || (!$uri_data['uri_param']) && self::$has_param) {
             http_response_code(404);
-            echo '404 Not Found';
+            echo json_encode(['message' => '404 Not Found']);
+            exit;
         }
+
+        $uri = $uri_data['uri'];
+        self::$uri_parameter = $uri_data['uri_param']; //if uri has a parameter => test/5
+        $callback = self::$routes[self::$request_method][$uri];
+        self::handle_callback_func($callback);
     }
 
     private static function handle_callback_func($callback)
@@ -142,10 +143,11 @@ class Router
         return file_get_contents('php://input') ?: []; // For other raw inputs
     }
 
-    private static function check_if_url_has_params($uri)
+    private static function check_if_url_take_params($uri)
     {
         if (substr($uri, -1) == '}') {
             $uri = substr($uri, 0, strpos($uri, '{'));
+            self::$has_param = true;
         }
         return trim($uri, '/');
     }
