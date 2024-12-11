@@ -7,7 +7,7 @@ use App\Models\Inventory;
 class InventoryController extends Controller
 {
 
-    
+
     function store($data)
     {
         $this->validate([$data], [
@@ -18,7 +18,6 @@ class InventoryController extends Controller
         $record = Inventory::insert($data);
         $this->response([
             'Message' => "Record Added Successfully",
-            'data' => $record
         ], 201);
     }
 }

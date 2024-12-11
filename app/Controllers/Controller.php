@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use Config\Database;
+use PDO;
 
 class Controller
 {
@@ -30,9 +31,12 @@ class Controller
         $stmt = $connection->prepare($query);
         $stmt->execute(['value' => $value]);
 
+        if ($stmt->fetchColumn() == 1 && $stmt->fetch(PDO::FETCH_ASSOC)['id'] == $data['id'])
+            return 1;
+
         return $stmt->fetchColumn() == 0;
     }
-    
+
     public function validate($data, $rules)
     {
         $errors = [];

@@ -26,25 +26,32 @@ class UomController extends Controller
         $this->validate($data, ['name' => 'required|string|unique:UOM,name']);
         $uom = Uom::insert($data);
         $this->response([
-            'Messages' => 'Inserted Successfully',
+            'message' => 'Inserted Successfully',
             'data' => $uom
         ], 201);
     }
 
     function update($id, $data)
     {
+        if (!Uom::find($id)) {
+            $this->response(['message' => '404 Not Found.'], 404);
+        }
+        $data['id'] = $id;
         $this->validate($data, ['name' => 'unique:UOM,name']);
 
         $uom = Uom::update($id, $data);
 
         $this->response([
-            'Message' => 'Updated Successfully.',
+            'message' => 'Updated Successfully.',
             'data' => $uom
         ], 200);
     }
 
     function delete($id)
     {
+        if (!Uom::find($id)) {
+            $this->response(['message' => '404 Not Found.'], 404);
+        }
         Uom::delete($id);
 
         $this->response([], 204);

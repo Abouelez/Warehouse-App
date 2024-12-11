@@ -46,8 +46,8 @@ class AuthController extends Controller
             ]);
 
             $this->response([
-                'Message' => 'Logged in Successfully',
-                'toke' => $token
+                'message' => 'Logged in Successfully',
+                'token' => $token
             ], 200);
         }
         $this->response(['Message' => 'Invalid credentials.'], 401);

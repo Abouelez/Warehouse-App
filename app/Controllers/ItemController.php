@@ -6,6 +6,7 @@ use App\Models\Inventory;
 use App\Models\Item;
 use App\Models\Transaction;
 use App\Models\Uom;
+use App\Resources\ItemResource;
 
 class ItemController extends Controller
 {
@@ -14,12 +15,7 @@ class ItemController extends Controller
     {
         $items = Item::all();
 
-        foreach ($items as &$item) {
-            $item['uom'] = Uom::find($item['uom_id']); //get uom details
-            unset($item['uom_id']);
-
-            $item['available_stock'] = Item::get_available_stock($item['id']); //get available stock
-        }
+        $items = ItemResource::collection_resource($items);
 
         $this->response(['data' => $items], 200);
     }
@@ -29,13 +25,10 @@ class ItemController extends Controller
         $data = Item::find($key);
         if (!$data)
             echo $this->response(['message' => '404 Not Found.'], 404);
-        $available_stock = Item::get_available_stock($data['id']);
-        $data['available_stock'] = $available_stock;
 
-        $data['uom'] = Uom::find($data['uom_id']); //get uom details
-        unset($data['uom_id']);
+        $item = ItemResource::resource($data);
 
-        $this->response(['data' => $data], 200);
+        $this->response(['data' => $item], 200);
     }
 
     function store($data)
@@ -55,14 +48,15 @@ class ItemController extends Controller
         Transaction::insert([
             'item_id' => $item['id'],
             'quantity' => $item['stock'],
-            'user_id' => '4',
+            'user_id' => UserController::get_auth_user()['id'],
             'date' => date('Y-m-d H:i:s'),
             'description' => 'New Item',
             'type' => 'new'
         ]);
+
         $this->response([
-            'Message' => 'Item Created Successfully',
-            'data' => $item
+            'message' => 'Item Created Successfully',
+            'data' => ItemResource::resource($item)
         ], 201);
     }
 
@@ -71,13 +65,18 @@ class ItemController extends Controller
         if (!Item::find($id)) {
             $this->response(['message' => '404 Not Found.'], 404);
         }
-
+        $data['id'] = $id;
         $this->validate($data, ['name' => 'unique:items,name']);
-        $item = Item::update($id, $data);
+        //You must sent old data also with request even if it wasn't updated.
+        $item = Item::update($id, [
+            'name' => $data['name'],
+            'description' => $data['description'],
+            'uom_id' => $data['uom_id']
+        ]);
 
         $this->response([
-            "Message" => "Item Updated Successfully",
-            'data' => $item
+            "message" => "Item Updated Successfully",
+            'data' => ItemResource::resource($item)
         ], 200);
     }
 

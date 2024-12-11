@@ -5,14 +5,16 @@ namespace App\Controllers;
 use App\Models\Inventory;
 use App\Models\Item;
 use App\Models\Transaction;
+use App\Resources\TransactionResource;
 
 class TransactionController extends Controller
 {
     function all_transactions()
     {
-        $data = Transaction::all();
+        $transactions = Transaction::all();
+        $transactions = TransactionResource::collection_resource($transactions);
         $this->response([
-            'data' => $data
+            'transactions' => $transactions
         ], 200);
     }
 
@@ -22,9 +24,13 @@ class TransactionController extends Controller
             $this->response(['message' => '404 Not Found.'], 404);
 
         $data = Transaction::findAll($type, 'type');
-        $this->response([
-            'data' => $data
-        ], 200);
+        if ($data) {
+            $transactions = TransactionResource::collection_resource($data);
+            $this->response([
+                'data' => $transactions
+            ], 200);
+        }
+        return $this->response(['message' => "No transactions found."]);
     }
 
     function store($data)
@@ -32,15 +38,18 @@ class TransactionController extends Controller
         $this->validate($data, [
             'item_id' => 'required',
             'quantity' => 'required|number',
-            'user_id' => 'required',
             'type' => 'required'
         ]);
 
-        if (
-            $data['type'] == 'out_for_work' &&
-            !Inventory::check_if_stock_available(Inventory::find($data['item_id'], 'item_id'), $data['quantity'])
-        )
-            $this->response(['message' => 'Required quantity is not available now.'], 422);
+        if ($data['type'] == 'out_for_work') {
+
+            $this->validate($data, ['receiver' => 'required']);
+
+            if (!Inventory::check_if_stock_available(Inventory::find($data['item_id'], 'item_id'), $data['quantity']))
+                $this->response(['message' => 'Required quantity is not available now.'], 422);
+        }
+
+        $data['user_id'] = UserController::get_auth_user()['id'];
 
         $transaction = Transaction::insert($data);
 
@@ -48,7 +57,7 @@ class TransactionController extends Controller
 
         $this->response([
             'message' => 'Transaction done successfully.',
-            'data' => $transaction
+            'data' => TransactionResource::resource($transaction)
         ], 201);
     }
 
@@ -64,7 +73,7 @@ class TransactionController extends Controller
         $this->store([
             'item_id' => $item_id,
             'quantity' => $data['quantity'],
-            'user_id' => '4',
+            'user_id' => UserController::get_auth_user()['id'],
             'type' => 'add'
         ]);
         echo $this->response(['message' => 'Stock updated successfully.'], 200);
@@ -90,8 +99,8 @@ class TransactionController extends Controller
         $item = Item::find($item_id);
         $inventory_record = Inventory::find($item_id, 'item_id');
 
-        if ($type == 'out_of_work')
-            $quantity = -$quantity;
+        if ($type == 'out_for_work')
+            $quantity = -1 * $quantity;
 
         if ($type == 'add') {
             Item::update(
@@ -104,5 +113,15 @@ class TransactionController extends Controller
             $inventory_record['id'],
             ['available_stock' => $inventory_record['available_stock'] + $quantity]
         );
+    }
+
+    function get_item_transactions($item_id)
+    {
+        $transactions = Transaction::findAll($item_id, 'item_id');
+        $transactions = TransactionResource::collection_resource($transactions);
+
+        $this->response([
+            'data' => $transactions
+        ]);
     }
 }

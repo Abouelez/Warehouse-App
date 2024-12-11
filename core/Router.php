@@ -13,6 +13,7 @@ class Router
     private static $request_method;
     private static $uri_parameter = null;
     private static $has_param = false;
+    private static $auth_routes = [];
     // public function __call($name, $arguments)
     // {
     //     echo "Method $name doesn't exist";
@@ -21,93 +22,121 @@ class Router
     {
         return self::$routes;
     }
-    static function middleware($middleware, $method, $uri)
-    {
-        if (
-            $_SERVER['REQUEST_METHOD'] == $method &&
-            trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') == trim($uri, '/')
-        )
-            Middleware::apply_middleware($middleware);
-    }
+    // static function middleware($middleware, $method, $uri)
+    // {
+
+    //     $s_uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    //     $s_uri = self::check_uri($s_uri)['uri'];
+
+    //     if (
+    //         $_SERVER['REQUEST_METHOD'] == $method &&
+    //         $s_uri == trim($uri, '/')
+    //     )
+    //         Middleware::apply_middleware($middleware);
+    // }
     public static function get($uri, $callback, $middleware = null)
     {
-        if ($middleware) self::middleware($middleware, 'GET', $uri);
 
-        $uri = self::check_if_url_take_params($uri);
         self::$routes['GET'][$uri] = $callback;
+        if ($middleware) self::$auth_routes[] = $uri;
     }
 
     public static function post($uri, $callback, $middleware = null)
     {
-        if ($middleware) self::middleware($middleware, 'POST', $uri);
-
-        $uri = self::check_if_url_take_params($uri);
         self::$routes['POST'][$uri] = $callback;
+
+        if ($middleware) self::$auth_routes[] = $uri;
     }
 
     public static function put($uri, $callback, $middleware = null)
     {
-        if ($middleware) self::middleware($middleware, 'POST', $uri);
-
-        $uri = self::check_if_url_take_params($uri);
         self::$routes['PUT'][$uri] = $callback;
+
+        if ($middleware) self::$auth_routes[] = $uri;
     }
 
     public static function delete($uri, $callback, $middleware = null)
     {
-        if ($middleware) self::middleware($middleware, 'POST', $uri);
-
-        $uri = self::check_if_url_take_params($uri);
         self::$routes['DELETE'][$uri] = $callback;
+
+        if ($middleware) self::$auth_routes[] = $uri;
     }
 
 
     public static function resolve()
     {
+
+
         self::get_method();   //get request method
 
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $uri_data = self::check_uri($uri); //get uri data 
+        $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+        foreach (self::$routes[self::$request_method] as $route => $callback) {
+            $pattern = preg_replace('#\{[^/]+\}#', '([^/]+)', $route); //Convert {id} to regex
+            $pattern = "#^$pattern$#";
 
-        if (!$uri_data || (!$uri_data['uri_param']) && self::$has_param) {
-            http_response_code(404);
-            echo json_encode(['message' => '404 Not Found']);
-            exit;
+            if (preg_match($pattern, $uri, $matches)) {
+
+
+                if (in_array($route, self::$auth_routes)) {
+                    Middleware::apply_middleware('auth');
+                }
+                array_shift($matches);
+
+                self::handle_callback_func($callback, $matches[0]);
+            }
         }
 
-        $uri = $uri_data['uri'];
-        self::$uri_parameter = $uri_data['uri_param']; //if uri has a parameter => test/5
-        $callback = self::$routes[self::$request_method][$uri];
-        self::handle_callback_func($callback);
+        //if not match any defined routes 
+        http_response_code(404);
+        echo json_encode(['message' => '404 Not Found']);
+        exit;
+
+        // $uri_data = self::check_uri($uri); //get uri data 
+
+        // if (!$uri_data || (!$uri_data['uri_param']) && self::$has_param) {
+        //     http_response_code(404);
+        //     echo json_encode(['message' => '404 Not Found']);
+        //     exit;
+        // }
+
+        // if (in_array($uri, self::$auth_routes)) {
+        //     Middleware::apply_middleware('auth');
+        // }
+
+        // $uri = $uri_data['uri'];
+        // self::$uri_parameter = $uri_data['uri_param']; //if uri has a parameter => test/5
+        // $callback = self::$routes[self::$request_method][$uri];
     }
 
-    private static function handle_callback_func($callback)
+    private static function handle_callback_func($callback, $param)
     {
+        //get request data
+        $data = self::get_requested_data(self::$request_method);
+
         if (is_array($callback)) {
             $controller = $callback[0];
             $method = $callback[1];
 
             $controller = new $controller();
-            //get request data
-            $data = self::get_requested_data(self::$request_method);
 
             //check if method has parameters
             $reflection = new ReflectionMethod($controller, $method);
 
             if ($reflection->getNumberOfParameters() > 0) {
-                if (self::$uri_parameter)
-                    $controller->$method(self::$uri_parameter, $data);
-                else
+                if ($param) {
+                    $controller->$method($param, $data);
+                } else
                     $controller->$method($data);
             } else {
-                if (self::$uri_parameter)
-                    $controller->$method(self::$uri_parameter);
+                if ($param)
+                    $controller->$method($param);
                 else
                     $controller->$method();
             }
         } else {
-            call_user_func($callback);
+            call_user_func($callback, $param, $data);
         }
+        exit;
     }
 
     private static function get_method()
@@ -122,6 +151,8 @@ class Router
 
     private static function get_requested_data($request_method)
     {
+
+        // if ($request_method == 'PUT') $request_method = 'POST';
 
         $content_type = $_SERVER['CONTENT_TYPE'];
 
@@ -140,17 +171,19 @@ class Router
         )
             return $_POST;
 
+
+
         return file_get_contents('php://input') ?: []; // For other raw inputs
     }
 
-    private static function check_if_url_take_params($uri)
-    {
-        if (substr($uri, -1) == '}') {
-            $uri = substr($uri, 0, strpos($uri, '{'));
-            self::$has_param = true;
-        }
-        return trim($uri, '/');
-    }
+    // private static function check_if_url_take_params($uri)
+    // {
+    //     if (substr($uri, -1) == '}') {
+    //         $uri = substr($uri, 0, strpos($uri, '{'));
+    //         self::$has_param = true;
+    //     }
+    //     return trim($uri, '/');
+    // }
     /**
      * check if uri is on routes
      * check if uri has parameter or not
@@ -179,5 +212,6 @@ class Router
     function __destruct()
     {
         self::$uri_parameter = null;
+        self::$has_param = false;
     }
 }
