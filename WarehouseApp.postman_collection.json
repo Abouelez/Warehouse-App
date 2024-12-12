@@ -1,0 +1,1880 @@
+{
+	"info": {
+		"_postman_id": "d1331207-7e5a-4d52-8d87-ab8449f498cc",
+		"name": "WarehouseApp",
+		"description": "This is a custom-built **Warehouse Management System** designed from scratch. It handles inventory management, user authentication, transactions, and unit measurements. The API uses token-based authentication (JWT) for secure access and includes dynamic routing for flexible operations.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23734957"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    pm.test(\"Successful login - Status code is 200\", function () {",
+							"        pm.response.to.have.status(201);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Registration - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Registration successful! Please login to continue.');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"new user99\",\n    \"user_name\": \"new_user99\",\n    \"password\": \"123456789\",\n    \"password_confirmation\": \"123456789\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Register",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"new user011100\",\n    \"user_name\": \"new_user011100\",\n    \"password\": \"123456789\",\n    \"password_confirmation\": \"123456789\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/register",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"register"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Registration successful! Please login to continue.\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful login - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful login - Token is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"        pm.expect(jsonData.data).to.be.a('string');",
+							"    });",
+							"",
+							"    pm.test(\"Successful login - Token has valid structure\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        var data = jsonData.data;",
+							"        pm.expect(data.split('.')).to.have.lengthOf(3); // JWT structure",
+							"    });",
+							"}else if (pm.response.code === 401) {",
+							"    // Check for failed login due to invalid credentials",
+							"    pm.test(\"Failed login - Status code is 401\", function () {",
+							"        pm.response.to.have.status(401);",
+							"    });",
+							"",
+							"    pm.test(\"Failed login - Error message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('Message');",
+							"        pm.expect(jsonData.Message).to.equal('Invalid credentials.');",
+							"    });",
+							"} else {",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_name\": \"new_user99\",\n    \"password\": \"123456789\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Login",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_name\": \"new_user011100\",\n    \"password\": \"123456789\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/login",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Logged in Successfully.\",\n    \"data\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjIzLCJpYXQiOjE3MzM5OTY3MzgsImV4cCI6bnVsbH0.iV6UrT462gLzmg3r3DchbTXkuep-GGy97ccJCtiFJ_c\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Create New UOM",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    pm.test(\"Successful Addation - Status code is 201\", function () {",
+							"        pm.response.to.have.status(201);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Addation - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Created Successfully.');",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"New Unit of Measurment\",\n    \"description\": \"NEw\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/uom",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"uom"
+					]
+				},
+				"description": "Add a new unit of measurement."
+			},
+			"response": [
+				{
+					"name": "Create New UOM",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Unit of Measurment\",\n    \"description\": \"NEw\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/uom",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"uom"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Created Successfully.\",\n    \"data\": {\n        \"id\": 43,\n        \"name\": \"New Unit of Measurment\",\n        \"description\": \"NEw\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Edit UOM",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful Update - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Update - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Updated Successfully.');",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Updated UOM Name\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/uom/30",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"uom",
+						"30"
+					]
+				},
+				"description": "Update a specific unit of measurement."
+			},
+			"response": [
+				{
+					"name": "Edit UOM",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated UOM Name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/uom/30",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"uom",
+								"30"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Updated Successfully.\",\n    \"data\": {\n        \"id\": 30,\n        \"name\": \"Updated UOM Name\",\n        \"description\": \"For countable items. Update name form pices to PCS\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get All UOMs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/all_uom",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"all_uom"
+					]
+				},
+				"description": "Retrieve all unit measurements."
+			},
+			"response": [
+				{
+					"name": "Get All UOMs",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/all_uom",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"all_uom"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"current_page\": \"?page=1\",\n        \"prev_page\": null,\n        \"next_page\": null,\n        \"data\": [\n            {\n                \"id\": 30,\n                \"name\": \"Updated UOM Name\",\n                \"description\": \"For countable items. Update name form pices to PCS\",\n                \"items\": [\n                    {\n                        \"id\": 17,\n                        \"name\": \"Updated Name\",\n                        \"description\": \"New Item\",\n                        \"stock\": 131,\n                        \"available_stock\": 211,\n                        \"outside_stock\": -80,\n                        \"uom\": {\n                            \"id\": 30,\n                            \"name\": \"Updated UOM Name\",\n                            \"description\": \"For countable items. Update name form pices to PCS\"\n                        }\n                    }\n                ]\n            },\n            {\n                \"id\": 33,\n                \"name\": \"test\",\n                \"description\": \"test\",\n                \"items\": [\n                    {\n                        \"id\": 19,\n                        \"name\": \"new item 1\",\n                        \"description\": \"new item 1\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 20,\n                        \"name\": \"new item 2\",\n                        \"description\": \"new item 2\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 21,\n                        \"name\": \"new item 3\",\n                        \"description\": \"new item 3\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 22,\n                        \"name\": \"new item 4\",\n                        \"description\": \"new item 4\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 23,\n                        \"name\": \"new item 5\",\n                        \"description\": \"new item 5\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 24,\n                        \"name\": \"new item 6\",\n                        \"description\": \"new item 6\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 26,\n                        \"name\": \"new name Updated1011x\",\n                        \"description\": \"updated description1101x\",\n                        \"stock\": 5,\n                        \"available_stock\": null,\n                        \"outside_stock\": 5,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 27,\n                        \"name\": \"new item 99\",\n                        \"description\": \"new item 99\",\n                        \"stock\": 5,\n                        \"available_stock\": 5,\n                        \"outside_stock\": 0,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    },\n                    {\n                        \"id\": 33,\n                        \"name\": \"new item 009000009\",\n                        \"description\": \"new item 009000009\",\n                        \"stock\": 5,\n                        \"available_stock\": 5,\n                        \"outside_stock\": 0,\n                        \"uom\": {\n                            \"id\": 33,\n                            \"name\": \"test\",\n                            \"description\": \"test\"\n                        }\n                    }\n                ]\n            },\n            {\n                \"id\": 35,\n                \"name\": \"new_uom\",\n                \"description\": \"new description\",\n                \"items\": []\n            },\n            {\n                \"id\": 42,\n                \"name\": \"new_uom001110\",\n                \"description\": \"new description111\",\n                \"items\": []\n            },\n            {\n                \"id\": 43,\n                \"name\": \"New Unit of Measurment\",\n                \"description\": \"NEw\",\n                \"items\": []\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get UOM By id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/find_uom/30",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"find_uom",
+						"30"
+					]
+				},
+				"description": "Find details of a specific unit of measurement."
+			},
+			"response": [
+				{
+					"name": "Get UOM By id",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/find_uom/30",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"find_uom",
+								"30"
+							]
+						}
+					},
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"id\": 30,\n        \"name\": \"Updated UOM Name\",\n        \"description\": \"For countable items. Update name form pices to PCS\",\n        \"items\": [\n            {\n                \"id\": 17,\n                \"name\": \"Updated Name\",\n                \"description\": \"New Item\",\n                \"stock\": 131,\n                \"available_stock\": 211,\n                \"outside_stock\": -80,\n                \"uom\": {\n                    \"id\": 30,\n                    \"name\": \"Updated UOM Name\",\n                    \"description\": \"For countable items. Update name form pices to PCS\"\n                }\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Delete UOM",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 204) {",
+							"    pm.test(\"Successful Deletion - Status code is 402\", function () {",
+							"        pm.response.to.have.status(204);",
+							"    });",
+							"",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 401, 404]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/uom/42",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"uom",
+						"42"
+					]
+				},
+				"description": "Delete a specific unit of measurement."
+			},
+			"response": [
+				{
+					"name": "Delete UOM",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/uom/41",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"uom",
+								"41"
+							]
+						}
+					},
+					"status": "No Content",
+					"code": 204,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Get All Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/items",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"items"
+					]
+				},
+				"description": "Retrieve all items in the inventory."
+			},
+			"response": [
+				{
+					"name": "Get All Items",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/items",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"items"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"current_page\": \"?page=1\",\n        \"prev_page\": null,\n        \"next_page\": \"?page=2\",\n        \"data\": [\n            {\n                \"id\": 17,\n                \"name\": \"Updated Name\",\n                \"description\": \"New Item\",\n                \"stock\": 131,\n                \"available_stock\": 211,\n                \"outside_stock\": -80,\n                \"uom\": {\n                    \"id\": 30,\n                    \"name\": \"Updated UOM Name\",\n                    \"description\": \"For countable items. Update name form pices to PCS\"\n                }\n            },\n            {\n                \"id\": 19,\n                \"name\": \"new item 1\",\n                \"description\": \"new item 1\",\n                \"stock\": 5,\n                \"available_stock\": null,\n                \"outside_stock\": 5,\n                \"uom\": {\n                    \"id\": 33,\n                    \"name\": \"test\",\n                    \"description\": \"test\"\n                }\n            },\n            {\n                \"id\": 20,\n                \"name\": \"new item 2\",\n                \"description\": \"new item 2\",\n                \"stock\": 5,\n                \"available_stock\": null,\n                \"outside_stock\": 5,\n                \"uom\": {\n                    \"id\": 33,\n                    \"name\": \"test\",\n                    \"description\": \"test\"\n                }\n            },\n            {\n                \"id\": 21,\n                \"name\": \"new item 3\",\n                \"description\": \"new item 3\",\n                \"stock\": 5,\n                \"available_stock\": null,\n                \"outside_stock\": 5,\n                \"uom\": {\n                    \"id\": 33,\n                    \"name\": \"test\",\n                    \"description\": \"test\"\n                }\n            },\n            {\n                \"id\": 22,\n                \"name\": \"new item 4\",\n                \"description\": \"new item 4\",\n                \"stock\": 5,\n                \"available_stock\": null,\n                \"outside_stock\": 5,\n                \"uom\": {\n                    \"id\": 33,\n                    \"name\": \"test\",\n                    \"description\": \"test\"\n                }\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Item By id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/find_item/22",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"find_item",
+						"22"
+					]
+				},
+				"description": "Find details of a specific item by ID."
+			},
+			"response": [
+				{
+					"name": "Get Item By id",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/find_item/22",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"find_item",
+								"22"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"id\": 22,\n        \"name\": \"new item 4\",\n        \"description\": \"new item 4\",\n        \"stock\": 5,\n        \"available_stock\": null,\n        \"outside_stock\": 5,\n        \"uom\": {\n            \"id\": 33,\n            \"name\": \"test\",\n            \"description\": \"test\"\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Create New Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    pm.test(\"Successful Addation - Status code is 201\", function () {",
+							"        pm.response.to.have.status(201);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Addation - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Created Successfully.');",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"New Item\",\n    \"description\": \"new\",\n    \"stock\": 5,\n    \"uom_id\": 33\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/items",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"items"
+					]
+				},
+				"description": "Add a new item to the inventory."
+			},
+			"response": [
+				{
+					"name": "Create New Item",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Item\",\n    \"description\": \"new\",\n    \"stock\": 5,\n    \"uom_id\": 33\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/items",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"items"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Created Successfully.\",\n    \"data\": {\n        \"id\": 34,\n        \"name\": \"New Item\",\n        \"description\": \"new\",\n        \"stock\": 5,\n        \"available_stock\": 5,\n        \"outside_stock\": 0,\n        \"uom\": {\n            \"id\": 33,\n            \"name\": \"test\",\n            \"description\": \"test\"\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Edit Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful Update - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Update - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Updated Successfully.');",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"New Item Updated Name\",\n    \"uom_id\": 33,\n    \"description\": \"updated\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/items/26",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"items",
+						"26"
+					]
+				},
+				"description": "Update details of a specific item by ID."
+			},
+			"response": [
+				{
+					"name": "Edit Item",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Item Updated Name\",\n    \"uom_id\": 33,\n    \"description\": \"updated\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/items/26",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"items",
+								"26"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Updated Successfully.\",\n    \"data\": {\n        \"id\": 26,\n        \"name\": \"New Item Updated Name\",\n        \"description\": \"updated\",\n        \"stock\": 5,\n        \"available_stock\": null,\n        \"outside_stock\": 5,\n        \"uom\": {\n            \"id\": 33,\n            \"name\": \"test\",\n            \"description\": \"test\"\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Delete Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 204) {",
+							"    pm.test(\"Successful Deletion - Status code is 402\", function () {",
+							"        pm.response.to.have.status(204);",
+							"    });",
+							"",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 401, 404]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/items/33",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"items",
+						"33"
+					]
+				},
+				"description": "Delete a specific item by ID."
+			},
+			"response": [
+				{
+					"name": "Delete Item",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/items/33",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"items",
+								"33"
+							]
+						}
+					},
+					"status": "No Content",
+					"code": 204,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Get All Transactions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/transactions",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"transactions"
+					]
+				},
+				"description": "Retrieve all stock transactions."
+			},
+			"response": [
+				{
+					"name": "Get All Transactions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/transactions",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"transactions"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"current_page\": \"?page=1\",\n        \"prev_page\": null,\n        \"next_page\": \"?page=2\",\n        \"data\": [\n            {\n                \"id\": 20,\n                \"quantity\": 50,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 20:23:44\",\n                \"description\": \"New Item\",\n                \"type\": \"new\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 22,\n                \"quantity\": 20,\n                \"user_id\": 5,\n                \"receiver\": \"Ali\",\n                \"date\": \"2024-12-11 21:58:07\",\n                \"description\": \"for out work\",\n                \"type\": \"return\",\n                \"returned_at\": \"2024-12-11 20:58:07\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 23,\n                \"quantity\": 12,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 21:59:16\",\n                \"type\": \"add\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 24,\n                \"quantity\": 20,\n                \"user_id\": 5,\n                \"receiver\": \"Ali\",\n                \"date\": \"2024-12-12 10:49:12\",\n                \"description\": \"for out work\",\n                \"type\": \"return\",\n                \"returned_at\": \"2024-12-12 09:49:12\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 25,\n                \"quantity\": 12,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 22:01:16\",\n                \"type\": \"add\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Transaction By Type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/get_transactions/new",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"get_transactions",
+						"new"
+					]
+				},
+				"description": "Retrieve transactions by type (e.g., incoming, outgoing)."
+			},
+			"response": [
+				{
+					"name": "Get Transaction By Type",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/get_transactions/new",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"get_transactions",
+								"new"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"current_page\": \"?page=1\",\n        \"prev_page\": null,\n        \"next_page\": null,\n        \"data\": [\n            {\n                \"id\": 20,\n                \"quantity\": 50,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 20:23:44\",\n                \"description\": \"New Item\",\n                \"type\": \"new\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 28,\n                \"quantity\": 5,\n                \"user_id\": 5,\n                \"date\": \"2024-12-12 09:49:11\",\n                \"description\": \"New Item\",\n                \"type\": \"new\",\n                \"item\": {\n                    \"id\": 27,\n                    \"name\": \"new item 99\",\n                    \"description\": \"new item 99\",\n                    \"stock\": 5,\n                    \"available_stock\": 5,\n                    \"outside_stock\": 0,\n                    \"uom\": {\n                        \"id\": 33,\n                        \"name\": \"test\",\n                        \"description\": \"test\"\n                    }\n                }\n            },\n            {\n                \"id\": 42,\n                \"quantity\": 5,\n                \"user_id\": 5,\n                \"date\": \"2024-12-12 10:23:09\",\n                \"description\": \"New Item\",\n                \"type\": \"new\",\n                \"item\": {\n                    \"id\": 33,\n                    \"name\": \"new item 009000009\",\n                    \"description\": \"new item 009000009\",\n                    \"stock\": 5,\n                    \"available_stock\": 5,\n                    \"outside_stock\": 0,\n                    \"uom\": {\n                        \"id\": 33,\n                        \"name\": \"test\",\n                        \"description\": \"test\"\n                    }\n                }\n            },\n            {\n                \"id\": 44,\n                \"quantity\": 5,\n                \"user_id\": 5,\n                \"date\": \"2024-12-12 10:49:40\",\n                \"description\": \"New Item\",\n                \"type\": \"new\",\n                \"item\": {\n                    \"id\": 34,\n                    \"name\": \"New Item\",\n                    \"description\": \"new\",\n                    \"stock\": 5,\n                    \"available_stock\": 5,\n                    \"outside_stock\": 0,\n                    \"uom\": {\n                        \"id\": 33,\n                        \"name\": \"test\",\n                        \"description\": \"test\"\n                    }\n                }\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Item Transactions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/item_transactions/17",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"item_transactions",
+						"17"
+					]
+				},
+				"description": "Retrieve all transactions related to a specific item."
+			},
+			"response": [
+				{
+					"name": "Get Item Transactions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/item_transactions/17",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"item_transactions",
+								"17"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"current_page\": \"?page=1\",\n        \"prev_page\": null,\n        \"next_page\": \"?page=2\",\n        \"data\": [\n            {\n                \"id\": 20,\n                \"quantity\": 50,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 20:23:44\",\n                \"description\": \"New Item\",\n                \"type\": \"new\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 22,\n                \"quantity\": 20,\n                \"user_id\": 5,\n                \"receiver\": \"Ali\",\n                \"date\": \"2024-12-11 21:58:07\",\n                \"description\": \"for out work\",\n                \"type\": \"return\",\n                \"returned_at\": \"2024-12-11 20:58:07\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 23,\n                \"quantity\": 12,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 21:59:16\",\n                \"type\": \"add\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 24,\n                \"quantity\": 20,\n                \"user_id\": 5,\n                \"receiver\": \"Ali\",\n                \"date\": \"2024-12-12 10:49:12\",\n                \"description\": \"for out work\",\n                \"type\": \"return\",\n                \"returned_at\": \"2024-12-12 09:49:12\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            },\n            {\n                \"id\": 25,\n                \"quantity\": 12,\n                \"user_id\": 5,\n                \"date\": \"2024-12-11 22:01:16\",\n                \"type\": \"add\",\n                \"item\": {\n                    \"id\": 17,\n                    \"name\": \"Updated Name\",\n                    \"description\": \"New Item\",\n                    \"stock\": 131,\n                    \"available_stock\": 211,\n                    \"outside_stock\": -80,\n                    \"uom\": {\n                        \"id\": 30,\n                        \"name\": \"Updated UOM Name\",\n                        \"description\": \"For countable items. Update name form pices to PCS\"\n                    }\n                }\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Add Stock To Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    pm.test(\"Successful Update - Status code is 200\", function () {",
+							"        pm.response.to.have.status(201);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Update - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Transaction Done Successfully.');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([200,404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"quantity\":5\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/add_to_item/17",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"add_to_item",
+						"17"
+					]
+				},
+				"description": "- Add stock to an existing item."
+			},
+			"response": [
+				{
+					"name": "Add Stock To Item",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\":5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/add_to_item/17",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"add_to_item",
+								"17"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Transaction Done Successfully.\",\n    \"data\": {\n        \"id\": 45,\n        \"quantity\": 5,\n        \"user_id\": 5,\n        \"date\": \"2024-12-12 11:51:31\",\n        \"type\": \"add\",\n        \"item\": {\n            \"id\": 17,\n            \"name\": \"Updated Name\",\n            \"description\": \"New Item\",\n            \"stock\": 136,\n            \"available_stock\": 216,\n            \"outside_stock\": -80,\n            \"uom\": {\n                \"id\": 30,\n                \"name\": \"Updated UOM Name\",\n                \"description\": \"For countable items. Update name form pices to PCS\"\n            }\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Return Stock To Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful Update - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Update - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('Stock Updated Successfully.');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/return_item/26",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"return_item",
+						"26"
+					]
+				},
+				"description": "Return out stock as available stock."
+			},
+			"response": [
+				{
+					"name": "Return Stock To Item",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/return_item/26",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"return_item",
+								"26"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"Stock Updated Successfully.\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Auth User Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Return Data\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('data');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/user",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user"
+					]
+				},
+				"description": "Retrieve the authenticated user’s details."
+			},
+			"response": [
+				{
+					"name": "Get Auth User Data",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/user",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"id\": 5,\n        \"user_name\": \"ezzzz\",\n        \"name\": \"Abdo Ezz\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Edit User Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Successful Update - Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    pm.test(\"Successful Update - message is present\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('message');",
+							"        pm.expect(jsonData.message).to.equal('User Data Updated Successfully.');",
+							"    });",
+							"}else if(pm.response.code === 422){",
+							"    pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+							"        pm.response.to.have.status(422);",
+							"    });",
+							"    pm.test(\"Response contains errors object\", function () {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.have.property('errors');",
+							"    });",
+							"}else{",
+							"    // Catch unexpected status codes",
+							"    pm.test(\"Unexpected status code\", function () {",
+							"        pm.expect(pm.response.code).to.be.oneOf([404, 401]);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJNeS1BcHAiLCJzdWIiOjUsImlhdCI6MTczMzk1MDkzOSwiZXhwIjpudWxsfQ.CEOhVzGYLp2voP8podp--h4LlXUSSrlOwBM7sJThi7o",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Abdo Ezz\",\n    \"user_name\": \"ezzzz\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/user",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user"
+					]
+				},
+				"description": "Update the current user’s information."
+			},
+			"response": [
+				{
+					"name": "Edit User Data",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Abdo Ezz\",\n    \"user_name\": \"ezzzz\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/user",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"message\": \"User Data Updated Successfully.\"\n}"
+				}
+			]
+		}
+	]
+}
