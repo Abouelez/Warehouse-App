@@ -6,6 +6,7 @@ use App\Helpers\TokenHelper;
 use App\Models\User;
 use App\Models\AccessToken;
 use App\Helpers\RequestHelper;
+use Core\Response;
 
 class AuthController extends Controller
 {
@@ -24,8 +25,7 @@ class AuthController extends Controller
         $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
 
         $user = User::insert($data);
-
-        $this->response(['message' => 'Registration successful! Please login to continue.'], 201);
+        Response::json_response("Registration successful! Please login to continue.", [], 201);
     }
 
     function login($data)
@@ -44,13 +44,9 @@ class AuthController extends Controller
                 'user_id' => $user['id'],
                 'token' => $token
             ]);
-
-            $this->response([
-                'message' => 'Logged in Successfully',
-                'token' => $token
-            ], 200);
+            Response::json_response('Logged in Successfully.', $token);
         }
-        $this->response(['Message' => 'Invalid credentials.'], 401);
+        Response::json_response('Invalid credentials.', [], 401);
     }
 
     function logout()
@@ -59,7 +55,6 @@ class AuthController extends Controller
         $access_token = new AccessToken();
         $access_token->delete($token['id']);
         unset($_SESSION['user']);
-
-        $this->response([], 204);
+        Response::json_response("", [], 204);
     }
 }

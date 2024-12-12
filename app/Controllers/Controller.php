@@ -3,23 +3,24 @@
 namespace App\Controllers;
 
 use Config\Database;
+use Core\Response;
 use PDO;
 
 class Controller
 {
-    public function response($data, $status_code = 200, $headers = [])
-    {
-        http_response_code($status_code);
+    // public function response($data, $status_code = 200, $headers = [])
+    // {
+    //     http_response_code($status_code);
 
-        header('Content-Type: application/json');
+    //     header('Content-Type: application/json');
 
-        foreach ($headers as $header) {
-            header($header);
-        }
-        echo json_encode($data);
-        exit;
-    }
-    public function is_unique($table_with_field, $value)
+    //     foreach ($headers as $header) {
+    //         header($header);
+    //     }
+    //     echo json_encode($data);
+    //     exit;
+    // }
+    public function is_unique($table_with_field, $value, $id)
     {
 
         $data = explode(',', $table_with_field); // form users,email to ['users', 'email']
@@ -27,14 +28,14 @@ class Controller
         $field = $data[1];
 
         $connection = Database::get_instance()->get_connection();
-        $query = "SELECT COUNT(*) FROM $table WHERE $field = :value";
+        $query = "SELECT * FROM $table WHERE $field = :value";
         $stmt = $connection->prepare($query);
         $stmt->execute(['value' => $value]);
-
-        if ($stmt->fetchColumn() == 1 && $stmt->fetch(PDO::FETCH_ASSOC)['id'] == $data['id'])
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res && $id == $res['id'])
             return 1;
 
-        return $stmt->fetchColumn() == 0;
+        return !$res;
     }
 
     public function validate($data, $rules)
@@ -57,14 +58,14 @@ class Controller
                     $errors[$field][] = "$field must be at least " . explode(":", $rule)[1] . " characters.";
                 elseif (str_starts_with($rule, "max:") && strlen($value) > explode(":", $rule)[1])
                     $errors[$field][] = "$field must be less than " . explode(":", $rule)[1] + 1 . " characters.";
-                elseif (str_starts_with($rule, 'unique:') && !$this->is_unique(explode(':', $rule)[1], $value))
+                elseif (str_starts_with($rule, 'unique:') && !$this->is_unique(explode(':', $rule)[1], $value, $data['id']))
                     $errors[$field][] = "$field must be unique";
                 elseif ($rule == "confirmed" && $value != $data['password_confirmation'])
                     $errors[$field][] = "Password confirmation does not match. Please ensure both passwords are identical.";
             }
         }
         if (!empty($errors)) {
-            $this->response(['errors' => $errors], 422);
+            Response::json_response("", $errors, 422, [], true);
             exit;
         }
     }

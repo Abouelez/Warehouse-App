@@ -7,6 +7,8 @@ use App\Models\Item;
 use App\Models\Transaction;
 use App\Models\Uom;
 use App\Resources\ItemResource;
+use Core\Pagination;
+use Core\Response;
 
 class ItemController extends Controller
 {
@@ -17,18 +19,17 @@ class ItemController extends Controller
 
         $items = ItemResource::collection_resource($items);
 
-        $this->response(['data' => $items], 200);
+        Response::json_response("", Pagination::paginate($items, 5));
     }
 
     function find($key)
     {
         $data = Item::find($key);
         if (!$data)
-            echo $this->response(['message' => '404 Not Found.'], 404);
+            Response::json_response("404 Not Found.", [], 404);
 
         $item = ItemResource::resource($data);
-
-        $this->response(['data' => $item], 200);
+        Response::json_response("", $item);
     }
 
     function store($data)
@@ -53,40 +54,35 @@ class ItemController extends Controller
             'description' => 'New Item',
             'type' => 'new'
         ]);
-
-        $this->response([
-            'message' => 'Item Created Successfully',
-            'data' => ItemResource::resource($item)
-        ], 201);
+        Response::json_response("Created Successfully.", ItemResource::resource($item), 201);
     }
 
     function update($id, $data)
     {
-        if (!Item::find($id)) {
-            $this->response(['message' => '404 Not Found.'], 404);
+        $item = Item::find($id);
+        if (!$item) {
+            Response::json_response("404 Not Found.", [], 404);
         }
         $data['id'] = $id;
-        $this->validate($data, ['name' => 'unique:items,name']);
+        $this->validate($data, [
+            'name' => 'required|unique:items,name',
+            'uom_id' => 'required'
+        ]);
         //You must sent old data also with request even if it wasn't updated.
-        $item = Item::update($id, [
+        $updated_item = Item::update($id, [
             'name' => $data['name'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? $item['description'],
             'uom_id' => $data['uom_id']
         ]);
-
-        $this->response([
-            "message" => "Item Updated Successfully",
-            'data' => ItemResource::resource($item)
-        ], 200);
+        Response::json_response("Updated Successfully.", ItemResource::resource($updated_item));
     }
 
     function delete($id)
     {
         if (!Item::find($id)) {
-            $this->response(['message' => '404 Not Found.'], 404);
+            Response::json_response("404 Not Found.", [], 404);
         }
         Item::delete($id);
-
-        $this->response([], 204);
+        Response::json_response("", [], 204);
     }
 }

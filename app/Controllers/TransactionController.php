@@ -6,6 +6,8 @@ use App\Models\Inventory;
 use App\Models\Item;
 use App\Models\Transaction;
 use App\Resources\TransactionResource;
+use Core\Pagination;
+use Core\Response;
 
 class TransactionController extends Controller
 {
@@ -13,24 +15,20 @@ class TransactionController extends Controller
     {
         $transactions = Transaction::all();
         $transactions = TransactionResource::collection_resource($transactions);
-        $this->response([
-            'transactions' => $transactions
-        ], 200);
+        Response::json_response("", Pagination::paginate($transactions, 5));
     }
 
     function get_transactions_by_type($type)
     {
         if (!in_array($type, ['new', 'return', 'out_for_work', 'add']))
-            $this->response(['message' => '404 Not Found.'], 404);
+            Response::json_response("404 Not Found.", [], 404);
 
         $data = Transaction::findAll($type, 'type');
         if ($data) {
             $transactions = TransactionResource::collection_resource($data);
-            $this->response([
-                'data' => $transactions
-            ], 200);
+            Response::json_response("", Pagination::paginate($transactions, 5));
         }
-        return $this->response(['message' => "No transactions found."]);
+        Response::json_response("No Transactions Found.");
     }
 
     function store($data)
@@ -46,7 +44,7 @@ class TransactionController extends Controller
             $this->validate($data, ['receiver' => 'required']);
 
             if (!Inventory::check_if_stock_available(Inventory::find($data['item_id'], 'item_id'), $data['quantity']))
-                $this->response(['message' => 'Required quantity is not available now.'], 422);
+                Response::json_response('Required Quantity is not Available Now.', [], 422);
         }
 
         $data['user_id'] = UserController::get_auth_user()['id'];
@@ -54,11 +52,7 @@ class TransactionController extends Controller
         $transaction = Transaction::insert($data);
 
         $this->update_stock($transaction['item_id'], $transaction['quantity'], $transaction['type']);
-
-        $this->response([
-            'message' => 'Transaction done successfully.',
-            'data' => TransactionResource::resource($transaction)
-        ], 201);
+        Response::json_response('Transaction Done Successfully.', TransactionResource::resource($transaction), 201);
     }
 
     function add_to_current_item($item_id, $data = [])
@@ -76,7 +70,7 @@ class TransactionController extends Controller
             'user_id' => UserController::get_auth_user()['id'],
             'type' => 'add'
         ]);
-        echo $this->response(['message' => 'Stock updated successfully.'], 200);
+        Response::json_response('Stock Updated Successfully.');
     }
 
     function return_item($transaction_id)
@@ -84,6 +78,10 @@ class TransactionController extends Controller
         $this->validate(['transaction_id' => $transaction_id], [
             'transaction_id' => 'required',
         ]);
+        $transaction = Transaction::find($transaction_id);
+        if (!$transaction || $transaction['type'] != 'out_for_work') {
+            Response::json_response("Invalid Transaction!.", [], 422);
+        }
 
         $transaction = Transaction::update($transaction_id, [
             'returned_at' => date('Y-m-d H:i:s'),
@@ -91,7 +89,7 @@ class TransactionController extends Controller
         ]);
         $this->update_stock(Item::find($transaction['item_id'])['id'], $transaction['quantity'], 'return');
 
-        echo $this->response(['message' => 'Stock updated successfully.'], 200);
+        Response::json_response('Stock Updated Successfully.');
     }
 
     function update_stock($item_id, $quantity,  $type)
@@ -119,9 +117,6 @@ class TransactionController extends Controller
     {
         $transactions = Transaction::findAll($item_id, 'item_id');
         $transactions = TransactionResource::collection_resource($transactions);
-
-        $this->response([
-            'data' => $transactions
-        ]);
+        Response::json_response("", Pagination::paginate($transactions, 5));
     }
 }

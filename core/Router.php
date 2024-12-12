@@ -87,8 +87,7 @@ class Router
         }
 
         //if not match any defined routes 
-        http_response_code(404);
-        echo json_encode(['message' => '404 Not Found']);
+        Response::json_response("404 Not Found.", [], 404);
         exit;
 
         // $uri_data = self::check_uri($uri); //get uri data 

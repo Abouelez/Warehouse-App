@@ -12,7 +12,7 @@ class Uom extends Model
 {
 
     protected  $table = "UOM";
-    protected $attributes = ['name', 'description'];
+    protected $attributes = ['id', 'name', 'description'];
     public function __construct()
     {
         parent::__construct();

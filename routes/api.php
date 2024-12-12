@@ -33,5 +33,6 @@ Router::get('transactions', [TransactionController::class, 'all_transactions'], 
 Router::get('get_transactions/{type}', [TransactionController::class, 'get_transactions_by_type'], 'auth'); //ok
 Router::get('item_transactions/{id}', [TransactionController::class, 'get_item_transactions'], 'auth');
 
-Router::put('users', [UserController::class, 'update'], 'auth');
+Router::put('user', [UserController::class, 'update'], 'auth');
 Router::get('user', [UserController::class, 'get_user'], 'auth');
+    

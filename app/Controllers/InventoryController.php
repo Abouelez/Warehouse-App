@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Inventory;
+use Core\Response;
 
 class InventoryController extends Controller
 {
@@ -16,8 +17,6 @@ class InventoryController extends Controller
         ]);
 
         $record = Inventory::insert($data);
-        $this->response([
-            'Message' => "Record Added Successfully",
-        ], 201);
+        Response::json_response("Created Successfully.", 201);
     }
 }

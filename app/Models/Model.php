@@ -107,6 +107,10 @@ class Model
         $instance = new static();
         // Validate that all keys exist in attributes
         foreach ($data as $key => $value) {
+            if ($key == 'id') {
+                unset($data['id']);
+                continue;
+            }
             if (!in_array($key, $instance->attributes)) {
                 throw new Exception("Attribute $key does not exist in " . get_called_class());
             }

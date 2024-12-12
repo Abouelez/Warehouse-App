@@ -4,6 +4,9 @@ namespace App\Controllers;
 
 use App\Models\Item;
 use App\Models\Uom;
+use App\Resources\ItemResource;
+use Core\Pagination;
+use Core\Response;
 
 class UomController extends Controller
 {
@@ -13,11 +16,11 @@ class UomController extends Controller
         //Get all UOM items :)
         foreach ($all as &$uom) {
 
-            $items = Item::find($uom['id'], 'uom_id');
+            $items = ItemResource::collection_resource(Item::findAll($uom['id'], 'uom_id'));
+
             $uom['items'] = $items ? $items : [];
         }
-
-        $this->response(['data' => $all], 200);
+        Response::json_response("", Pagination::paginate($all, 5));
     }
 
 
@@ -25,43 +28,43 @@ class UomController extends Controller
     {
         $this->validate($data, ['name' => 'required|string|unique:UOM,name']);
         $uom = Uom::insert($data);
-        $this->response([
-            'message' => 'Inserted Successfully',
-            'data' => $uom
-        ], 201);
+        Response::json_response("Created Successfully.", $uom, 201);
     }
 
     function update($id, $data)
     {
-        if (!Uom::find($id)) {
-            $this->response(['message' => '404 Not Found.'], 404);
+        $uom = Uom::find($id);
+        if (!$uom) {
+            Response::json_response("404 Not Found.", 404);
         }
         $data['id'] = $id;
-        $this->validate($data, ['name' => 'unique:UOM,name']);
+        $this->validate($data, ['name' => 'required|unique:UOM,name']);
 
-        $uom = Uom::update($id, $data);
+        $updated_uom = Uom::update($id, [
+            'name' => $data['name'],
+            'description' => $data['description'] ?? $uom['description']
+        ]);
 
-        $this->response([
-            'message' => 'Updated Successfully.',
-            'data' => $uom
-        ], 200);
+        Response::json_response("Updated Successfully.", $updated_uom);
     }
 
     function delete($id)
     {
         if (!Uom::find($id)) {
-            $this->response(['message' => '404 Not Found.'], 404);
+            Response::json_response("404 Not Found.", [], 404);
         }
         Uom::delete($id);
-
-        $this->response([], 204);
+        Response::json_response("", [], 204);
     }
 
     function find($key)
     {
         $uom = Uom::find($key);
-        $items = Item::find($key, 'uom_id');
+        if (!$uom) {
+            Response::json_response("404 Not Found.", 404);
+        }
+        $items = ItemResource::collection_resource(Item::findAll($key, 'uom_id'));
         $uom['items'] = $items ? $items : [];
-        $this->response(['data' => $uom], 200);
+        Response::json_response("", $uom);
     }
 }
